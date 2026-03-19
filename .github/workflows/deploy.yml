@@ -1,4 +1,4 @@
-name: Build and Deploy to Azure
+name: Build and Push Docker Image
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -30,23 +30,3 @@ jobs:
           context: .
           push: true
           tags: callumteesside/hospital-app:latest
-
-      - name: Login to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Deploy to Azure Container Instances
-        run: |
-          az container delete --resource-group hospital-rg --name hospital-app --yes || true
-          az container create \
-            --resource-group hospital-rg \
-            --name hospital-app \
-            --image callumteesside/hospital-app:latest \
-            --ports 8443 \
-            --dns-name-label callum-hospital \
-            --os-type Linux \
-            --cpu 1 \
-            --memory 1.5 \
-            --environment-variables NODE_ENV=production \
-            --secure-environment-variables MONGODB_URI="${{ secrets.MONGODB_URI }}"
