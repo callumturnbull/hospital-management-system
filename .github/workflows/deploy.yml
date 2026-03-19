@@ -6,8 +6,90 @@ on:
       - main
 
 jobs:
+  checks:
+    runs-on: ubuntu-latest
+    name: Code Checks
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: 1 - JavaScript syntax check
+        run: |
+          echo "Checking JavaScript syntax..."
+          node --check index.js
+          node --check migration.js
+          node --check models/patient.js
+          node --check models/Room.js
+          node --check models/Users.js
+          echo "All JS files passed syntax check"
+
+      - name: 2 - Required file structure check
+        run: |
+          echo "Checking required files exist..."
+          required_files=(
+            "index.js"
+            "Dockerfile"
+            "docker-compose.yml"
+            "models/patient.js"
+            "models/Room.js"
+            "models/Users.js"
+            "views/login.ejs"
+            "views/patients.ejs"
+            "views/rooms.ejs"
+            "views/patient.ejs"
+            "views/new_patient.ejs"
+            "views/new_room.ejs"
+          )
+          for file in "${required_files[@]}"; do
+            if [ -f "$file" ]; then
+              echo "OK $file exists"
+            else
+              echo "MISSING $file"
+              exit 1
+            fi
+          done
+          echo "All required files present"
+
+      - name: 3 - Dockerfile lint
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+          failure-threshold: error
+
+      - name: 4 - Dependency security audit
+        run: npm audit --audit-level=critical
+        continue-on-error: true
+
+      - name: 5 - Check public assets exist
+        run: |
+          echo "Checking public assets..."
+          assets=(
+            "public/css/enhanced-styles.css"
+            "public/js/patient-interface.js"
+          )
+          for asset in "${assets[@]}"; do
+            if [ -f "$asset" ]; then
+              echo "OK $asset exists"
+            else
+              echo "MISSING $asset"
+              exit 1
+            fi
+          done
+          echo "All public assets present"
+
   build:
     runs-on: ubuntu-latest
+    needs: checks
+    name: Build and Push Docker Image
 
     steps:
       - name: Checkout code
