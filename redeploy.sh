@@ -1,0 +1,2 @@
+#!/bin/bash
+az container delete --resource-group hospital-rg --name hospital-app --yes && az container create --resource-group hospital-rg --name hospital-app --image callumteesside/hospital-app:latest --ports 8443 --dns-name-label callum-hospital --os-type Linux --cpu 1 --memory 1.5 --environment-variables NODE_ENV=production --secure-environment-variables MONGODB_URI="mongodb+srv://f5083318_db_user:Gi4ZwNPycZ35asvl@hospitaldb.zzmasyu.mongodb.net/callumDB?retryWrites=true&w=majority&appName=hospitalDB"
