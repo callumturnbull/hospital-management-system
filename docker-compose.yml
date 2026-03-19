@@ -1,0 +1,20 @@
+services:
+  cloudapp:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: callumteesside/hospital-app
+    ports:
+      - "10555:8443"
+    volumes:
+      - ./ssl:/app/ssl
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=${MONGODB_URI}
+    restart: unless-stopped
+    networks:
+      - cloudapp-network
+
+networks:
+  cloudapp-network:
+    driver: bridge

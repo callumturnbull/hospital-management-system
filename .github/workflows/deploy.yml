@@ -1,0 +1,52 @@
+name: Build and Deploy to Azure
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate SSL certificates
+        run: |
+          mkdir -p ssl
+          openssl req -x509 -newkey rsa:4096 -keyout ssl/private.key -out ssl/certificate.pem -days 365 -nodes -subj "/CN=callum-hospital.uksouth.azurecontainer.io"
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: callumteesside/hospital-app:latest
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy to Azure Container Instances
+        run: |
+          az container delete --resource-group hospital-rg --name hospital-app --yes || true
+          az container create \
+            --resource-group hospital-rg \
+            --name hospital-app \
+            --image callumteesside/hospital-app:latest \
+            --ports 8443 \
+            --dns-name-label callum-hospital \
+            --os-type Linux \
+            --cpu 1 \
+            --memory 1.5 \
+            --environment-variables NODE_ENV=production \
+            --secure-environment-variables MONGODB_URI="${{ secrets.MONGODB_URI }}"
