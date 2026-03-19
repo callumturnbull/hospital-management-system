@@ -18,14 +18,14 @@
         <div class="card">
             <div class="card-body">
                 <p><strong>Name:</strong> <%= patient.firstName %> <%= patient.lastName %></p>
-                <p><strong>Date of Birth:</strong> <%= patient.dateOfBirth.toLocaleDateString() %></p>
+                <p><strong>Date of Birth:</strong> <%= patient.dateOfBirth.toLocaleDateString('en-GB') %></p>
                 <p><strong>Medical Condition:</strong> <%= patient.medicalCondition || 'Not specified' %></p>
                 <p><strong>Room:</strong> <%= patient.roomNumber ? `Room ${patient.roomNumber}` : 'Unassigned' %></p>
                 <p><strong>Status:</strong> <%= patient.discharged ? 'Discharged' : 'Active' %></p>
                 <% if (patient.discharged && patient.dischargeDate) { %>
-                    <p><strong>Discharge Date:</strong> <%= patient.dischargeDate.toLocaleDateString() %></p>
+                    <p><strong>Discharge Date:</strong> <%= patient.dischargeDate.toLocaleDateString('en-GB') %></p>
                 <% } %>
-                <p><strong>Admission Date:</strong> <%= patient.admissionDate ? patient.admissionDate.toLocaleDateString() : 'Not specified' %></p>
+                <p><strong>Admission Date:</strong> <%= patient.admissionDate ? patient.admissionDate.toLocaleDateString('en-GB') : 'Not specified' %></p>
                 <% if (patient.notes) { %>
                     <p><strong>Notes:</strong> <%= patient.notes %></p>
                 <% } %>

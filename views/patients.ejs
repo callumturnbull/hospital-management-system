@@ -92,7 +92,7 @@
                                     <strong>Medical Condition:</strong> <%= patient.medicalCondition %><br>
                                     <strong>Room:</strong> <%= patient.roomNumber ? `Room ${patient.roomNumber}` : 'Unassigned' %><br>
                                     <% if (patient.discharged && patient.dischargeDate) { %>
-                                        <strong>Discharged:</strong> <%= patient.dischargeDate.toLocaleDateString() %><br>
+                                        <strong>Discharged:</strong> <%= patient.dischargeDate.toLocaleDateString('en-GB') %><br>
                                     <% } %>
                                     <% if (patient.notes) { %>
                                         <strong>Notes:</strong> <%= patient.notes %>
