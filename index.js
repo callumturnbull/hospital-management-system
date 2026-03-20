@@ -149,7 +149,7 @@ app.post("/login", loginLimiter, [
     if (!match) return res.send("Incorrect password");
 
     req.session.userId = user._id;
-    res.redirect("/patients");
+    res.redirect(user.role === 'admin' ? "/dashboard" : "/patients");
 });
 
 app.get("/logout", isAuthenticated, (req, res) => {
@@ -161,6 +161,18 @@ app.get("/logout", isAuthenticated, (req, res) => {
 
 app.get("/", isAuthenticated, (req, res) => {
     res.redirect("/patients");
+});
+
+app.get("/dashboard", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+        const rooms = await Room.find().populate('currentPatients');
+        const totalPatients = await Patient.countDocuments({ discharged: false });
+        const dischargedPatients = await Patient.countDocuments({ discharged: true });
+        const recentPatients = await Patient.find({ discharged: false }).sort({ admissionDate: -1 }).limit(5);
+        res.render("dashboard", { rooms, totalPatients, dischargedPatients, recentPatients, csrfToken: req.csrfToken() });
+    } catch (error) {
+        res.status(500).send("Error loading dashboard");
+    }
 });
 
 app.get("/patients", isAuthenticated, async (req, res) => {
